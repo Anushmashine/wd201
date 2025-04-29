@@ -1,85 +1,78 @@
-const todoList = () => {
-    all = []
-    const add = (todoItem) => {
-      all.push(todoItem)
-    }
-    const markAsComplete = (index) => {
-      all[index].completed = true
-    }
-  
-    const overdue = () => {
-      return all.filter(item => item.dueDate < today)
-    }
-  
-    const dueToday = () => {
-      return all.filter(item => item.dueDate === today)
-    }
-  
-    const dueLater = () => {
-      return all.filter(item => item.dueDate > today)
-    }
-  
-    const toDisplayableList = (list) => {
-      return list.map(item => {
-        const checkbox = item.completed ? '[x]' : '[ ]';
-        const title = item.title;
-        const dueDate = item.dueDate === today ? '' : ' ' + item.dueDate;
-        return `${checkbox} ${title}${dueDate}`;
-      }).join('\n')
-    }
-  
-    return {
-      all,
-      add,
-      markAsComplete,
-      overdue,
-      dueToday,
-      dueLater,
-      toDisplayableList
-    };
-  };
-  
-  // ####################################### #
-  // DO NOT CHANGE ANYTHING BELOW THIS LINE. #
-  // ####################################### #
-  
-  const todos = todoList();
-  
-  const formattedDate = d => {
-    return d.toISOString().split("T")[0]
-  }
-  
-  var dateToday = new Date()
-  const today = formattedDate(dateToday)
-  const yesterday = formattedDate(
-    new Date(new Date().setDate(dateToday.getDate() - 1))
-  )
-  const tomorrow = formattedDate(
-    new Date(new Date().setDate(dateToday.getDate() + 1))
-  )
-  
-  todos.add({ title: 'Submit assignment', dueDate: yesterday, completed: false })
-  todos.add({ title: 'Pay rent', dueDate: today, completed: true })
-  todos.add({ title: 'Service Vehicle', dueDate: today, completed: false })
-  todos.add({ title: 'File taxes', dueDate: tomorrow, completed: false })
-  todos.add({ title: 'Pay electric bill', dueDate: tomorrow, completed: false })
-  
-  console.log("My Todo-list\n")
-  
-  console.log("Overdue")
-  var overdues = todos.overdue()
-  var formattedOverdues = todos.toDisplayableList(overdues)
-  console.log(formattedOverdues)
-  console.log("\n")
-  
-  console.log("Due Today")
-  let itemsDueToday = todos.dueToday()
-  let formattedItemsDueToday = todos.toDisplayableList(itemsDueToday)
-  console.log(formattedItemsDueToday)
-  console.log("\n")
-  
-  console.log("Due Later")
-  let itemsDueLater = todos.dueLater()
-  let formattedItemsDueLater = todos.toDisplayableList(itemsDueLater)
-  console.log(formattedItemsDueLater)
-  console.log("\n\n")
+const { todoList, formattedDate, today } = require("./todo");
+
+describe("Todo List Test Suite", () => {
+  let todos;
+
+  const yesterday = formattedDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+  const tomorrow = formattedDate(new Date(new Date().setDate(new Date().getDate() + 1)));
+
+  beforeEach(() => {
+    todos = todoList();
+    todos.add({ title: 'Submit assignment', dueDate: yesterday, completed: false });
+    todos.add({ title: 'Pay rent', dueDate: today, completed: true });
+    todos.add({ title: 'Service Vehicle', dueDate: today, completed: false });
+    todos.add({ title: 'File taxes', dueDate: tomorrow, completed: false });
+    todos.add({ title: 'Complete project', dueDate: tomorrow, completed: false });
+  });
+
+  test("Should add a new todo", () => {
+    const initialCount = todos.all.length;
+    const newTodo = { title: 'New Todo', dueDate: today, completed: false };
+    todos.add(newTodo);
+    
+    expect(todos.all.length).toBe(initialCount + 1);
+    expect(todos.all).toContainEqual(expect.objectContaining(newTodo));
+  });
+
+  test("Should mark a todo as complete", () => {
+    const incompleteTodoIndex = todos.all.findIndex(t => !t.completed && t.dueDate === today);
+    todos.markAsComplete(incompleteTodoIndex);
+    
+    expect(todos.all[incompleteTodoIndex].completed).toBe(true);
+    expect(todos.all.filter(t => t.completed).length).toBe(2); // Originally 1 completed
+  });
+
+  test("Should retrieve overdue items", () => {
+    const overdues = todos.overdue();
+    
+    expect(overdues.length).toBe(1);
+    expect(overdues[0].title).toBe("Submit assignment");
+    expect(overdues.every(todo => todo.dueDate < today)).toBe(true);
+  });
+
+  test("Should retrieve due today items", () => {
+    const dueTodays = todos.dueToday();
+    
+    expect(dueTodays.length).toBe(2);
+    expect(dueTodays.some(t => t.title === "Pay rent" && t.completed)).toBe(true);
+    expect(dueTodays.some(t => t.title === "Service Vehicle" && !t.completed)).toBe(true);
+    expect(dueTodays.every(todo => todo.dueDate === today)).toBe(true);
+  });
+
+  test("Should retrieve due later items", () => {
+    const dueLaters = todos.dueLater();
+    
+    expect(dueLaters.length).toBe(2);
+    expect(dueLaters[0].title).toBe("File taxes");
+    expect(dueLaters[1].title).toBe("Complete project");
+    expect(dueLaters.every(todo => todo.dueDate > today)).toBe(true);
+  });
+
+  test("Should format todo items correctly", () => {
+    const formattedToday = todos.toDisplayableList(todos.dueToday());
+    const formattedOverdue = todos.toDisplayableList(todos.overdue());
+    const formattedDueLater = todos.toDisplayableList(todos.dueLater());
+    
+    // Test today's items formatting
+    expect(formattedToday).toContain("[x] Pay rent");
+    expect(formattedToday).toContain("[ ] Service Vehicle");
+    
+    // Test overdue items formatting
+    expect(formattedOverdue).toContain("[ ] Submit assignment");
+    expect(formattedOverdue).toContain(yesterday);
+    
+    // Test due later items formatting
+    expect(formattedDueLater).toContain("[ ] File taxes");
+    expect(formattedDueLater).toContain(tomorrow);
+  });
+});
