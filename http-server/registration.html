@@ -1,36 +1,239 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <title>Registration Form</title>
-   <style>
-     body { font-family: Arial, sans-serif; margin: 20px; }
-     form { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-     div { margin-bottom: 15px; }
-     label { display: block; margin-bottom: 5px; }
-     input { width: 100%; padding: 8px; box-sizing: border-box; }
-     button { background: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
-     button:hover { background: #45a049; }
-     .back-link { display: block; margin-top: 20px; }
-   </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
 </head>
 <body>
-   <h1>Registration Form</h1>
-   <form action="/register" method="POST">
-     <div>
-       <label for="name">Name:</label>
-       <input type="text" id="name" name="name" required>
-     </div>
-     <div>
-       <label for="email">Email:</label>
-       <input type="email" id="email" name="email" required>
-     </div>
-     <div>
-       <label for="password">Password:</label>
-       <input type="password" id="password" name="password" required>
-     </div>
-     <button type="submit">Register</button>
-   </form>
-   <a href="/project" class="back-link">← Back to Projects</a>
+    <div class="container">
+        <h1>Registration Form</h1>
+        
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" required>
+                <span id="dobError" class="error-message"></span>
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="acceptTerms" required>
+                <label for="acceptTerms">📌 Accept Terms & Conditions</label>
+            </div>
+            
+            <button type="submit" id="submitBtn">Submit</button>
+        </form>
+        
+        <h2>Entries</h2>
+        <table id="entriesTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Dob</th>
+                    <th>Accepted terms?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Entries will be added here dynamically -->
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registrationForm');
+            const entriesTable = document.getElementById('entriesTable').getElementsByTagName('tbody')[0];
+            const dobInput = document.getElementById('dob');
+            const dobError = document.getElementById('dobError');
+
+            loadSavedData();
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!validateAge()) {
+                    return;
+                }
+                
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const dob = document.getElementById('dob').value;
+                const acceptedTerms = document.getElementById('acceptTerms').checked;
+                
+                const entry = {
+                    name,
+                    email,
+                    password, 
+                    dob: formatDate(dob),
+                    acceptedTerms
+                };
+                
+                addEntryToTable(entry);
+                saveEntry(entry);
+                form.reset();
+            });
+            
+            function validateAge() {
+                if (!dobInput.value) return false;
+                
+                const dob = new Date(dobInput.value);
+                const today = new Date();
+                let age = today.getFullYear() - dob.getFullYear();
+                const monthDiff = today.getMonth() - dob.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                    age--;
+                }
+                
+                if (age < 18 || age > 55) {
+                    dobError.textContent = 'Age must be between 18 and 55 years.';
+                    return false;
+                } else {
+                    dobError.textContent = '';
+                    return true;
+                }
+            }
+            
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            function addEntryToTable(entry) {
+                const row = entriesTable.insertRow();
+                
+                row.insertCell(0).textContent = entry.name;
+                row.insertCell(1).textContent = entry.email;
+                row.insertCell(2).textContent = entry.password;
+                row.insertCell(3).textContent = entry.dob;
+                row.insertCell(4).textContent = entry.acceptedTerms ? 'true' : 'false';
+            }
+            
+            function saveEntry(entry) {
+                let entries = JSON.parse(localStorage.getItem('formEntries')) || [];
+                entries.push(entry);
+                localStorage.setItem('formEntries', JSON.stringify(entries));
+            }
+            
+            function loadSavedData() {
+                const entries = JSON.parse(localStorage.getItem('formEntries')) || [];
+                entries.forEach(entry => addEntryToTable(entry));
+            }
+        });
+    </script>
 </body>
 </html>
