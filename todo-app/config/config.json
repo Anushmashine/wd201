@@ -14,7 +14,7 @@
     "dialect": "postgres"
   },
   "production": {
-    "use_env_variable": "postgresql://todoapp_02iw_user:OwB5roUyuYTaMav3AKA8oXVVetAKLD90@dpg-d0onob8dl3ps73a5aecg-a/todoapp_02iw",
+    "use_env_variable": "DATABASE_URL",
     "dialect": "postgres"
   }
 }
