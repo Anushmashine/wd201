@@ -1,5 +1,18 @@
-<%- include("header") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Todo App</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <%- include("header") %>
 
-<%- include("todos", { todos: todos }) %>
+    <%- include("todos", { todos: todos }) %>
 
-<%- include("footer") %>
+    <%- include("footer") %>
+  </div>
+</body>
+</html>
