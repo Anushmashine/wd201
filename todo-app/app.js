@@ -2,17 +2,29 @@ const express = require("express");
 const app = express();
 const { Todo } = require("./models");
 const bodyParser = require("body-parser");
+const path = require("path");
+
 app.use(bodyParser.json());
 
-app.get("/", function (request, response) {
-  response.send("Hello World");
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", async (req, res) => {
+  try {
+    const todos = await Todo.findAll({ order: [['id', 'ASC']] });
+    res.render("index", { todos });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error loading todos");
+  }
 });
 
 app.get("/todos", async function (_request, response) {
-  console.log("Processing list of all Todos ...");
   try {
     const todos = await Todo.findAll({
-      order: [['id', 'ASC']] // Order by ID in ascending order
+      order: [['id', 'ASC']]
     });
     return response.json(todos);
   } catch (error) {
@@ -62,7 +74,6 @@ app.put("/todos/:id/markAsCompleted", async function (request, response) {
 });
 
 app.delete("/todos/:id", async function (request, response) {
-  console.log("We have to delete a Todo with ID: ", request.params.id);
   try {
     const todo = await Todo.findByPk(request.params.id);
     if (!todo) {
