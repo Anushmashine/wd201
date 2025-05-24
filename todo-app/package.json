@@ -1,17 +1,23 @@
 {
   "name": "todo-app",
   "version": "1.0.0",
+  "description": "A simple todo app using Node.js, Express, EJS, and PostgreSQL",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon -e js,ejs index.js",
+    "start:prod": "node index.js"
   },
-  "author": "",
+  "author": "anushmashine",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "pg": "^8.15.6",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
