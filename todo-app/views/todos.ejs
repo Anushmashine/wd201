@@ -5,7 +5,7 @@
   </thead>
   <tbody>
     <% overdue.forEach(todo => { %>
-      <tr class="<%= todo.completed ? 'completed' : '' %>">
+      <tr>
         <td><%= todo.id %></td>
         <td><%= todo.title %></td>
         <td><%= todo.dueDate.toISOString().slice(0, 10) %></td>
@@ -22,7 +22,7 @@
   </thead>
   <tbody>
     <% dueToday.forEach(todo => { %>
-      <tr class="<%= todo.completed ? 'completed' : '' %>">
+      <tr>
         <td><%= todo.id %></td>
         <td><%= todo.title %></td>
         <td><%= todo.dueDate.toISOString().slice(0, 10) %></td>
@@ -39,7 +39,7 @@
   </thead>
   <tbody>
     <% dueLater.forEach(todo => { %>
-      <tr class="<%= todo.completed ? 'completed' : '' %>">
+      <tr>
         <td><%= todo.id %></td>
         <td><%= todo.title %></td>
         <td><%= todo.dueDate.toISOString().slice(0, 10) %></td>
