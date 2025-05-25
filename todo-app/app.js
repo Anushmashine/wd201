@@ -1,10 +1,11 @@
 const express = require("express");
 const app = express();
 const { Todo } = require("./models");
-const bodyParser = require("body-parser");
 const path = require("path");
 
-app.use(bodyParser.json());
+// Middleware to parse JSON and form-urlencoded
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -13,8 +14,28 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", async (req, res) => {
   try {
-    const todos = await Todo.findAll({ order: [['id', 'ASC']] });
-    res.render("index", { todos });
+    const todos = await Todo.findAll({ order: [["id", "ASC"]] });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const overdue = [];
+    const dueToday = [];
+    const dueLater = [];
+
+    todos.forEach((todo) => {
+      const dueDate = new Date(todo.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+
+      if (!todo.completed && dueDate < today) {
+        overdue.push(todo);
+      } else if (dueDate.getTime() === today.getTime()) {
+        dueToday.push(todo);
+      } else {
+        dueLater.push(todo);
+      }
+    });
+
+    res.render("index", { overdue, dueToday, dueLater });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error loading todos");
@@ -24,7 +45,7 @@ app.get("/", async (req, res) => {
 app.get("/todos", async function (_request, response) {
   try {
     const todos = await Todo.findAll({
-      order: [['id', 'ASC']]
+      order: [["id", "ASC"]],
     });
     return response.json(todos);
   } catch (error) {
@@ -48,11 +69,12 @@ app.get("/todos/:id", async function (request, response) {
 
 app.post("/todos", async function (request, response) {
   try {
-    if (!request.body.title || !request.body.dueDate) {
-      return response.status(400).json({ error: "Title and dueDate are required" });
+    const { title, dueDate } = request.body;
+    if (!title || !dueDate) {
+      return response.redirect("/");
     }
-    const todo = await Todo.addTodo(request.body);
-    return response.json(todo);
+    await Todo.create({ title, dueDate, completed: false });
+    return response.redirect("/");
   } catch (error) {
     console.log(error);
     return response.status(422).json(error);
@@ -88,3 +110,4 @@ app.delete("/todos/:id", async function (request, response) {
 });
 
 module.exports = app;
+
