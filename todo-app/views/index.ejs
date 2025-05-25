@@ -10,7 +10,15 @@
   <div class="container">
     <%- include("header") %>
 
-    <%- include("todos", { todos: todos }) %>
+    <!-- Form to add a new todo -->
+    <form action="/todos" method="POST" id="todo-form" style="margin-bottom: 20px;">
+      <input type="text" name="title" placeholder="Enter todo title" required />
+      <input type="date" name="dueDate" required />
+      <button type="submit">Add</button>
+    </form>
+
+    <!-- Include todos partial with the 3 lists -->
+    <%- include("todos", { overdue: overdue, dueToday: dueToday, dueLater: dueLater }) %>
 
     <%- include("footer") %>
   </div>
