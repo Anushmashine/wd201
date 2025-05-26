@@ -9,7 +9,7 @@
   <%- include("header") %>
 
   <main class="container mx-auto px-4 py-8 max-w-4xl">
-    <h1 class="text-3xl font-bold text-gray-600 mb-8">My Todo-list</h1>
+    <!-- Removed: <h1 class="text-3xl font-bold text-gray-600 mb-8">My Todo-list</h1> -->
 
     <!-- Add Todo Form -->
     <form class="flex flex-col sm:flex-row gap-4 mb-10" action="/todos" method="POST">
@@ -42,24 +42,20 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <% overdue.forEach(todo => { %>
             <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= todo.id %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.title %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.dueDate %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <input 
-                  type="checkbox" 
-                  class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300 rounded"
-                  <%= todo.completed ? "checked" : "" %>
-                >
+              <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= todo.id %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.title %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.dueDate %></td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <input type="checkbox" class="h-4 w-4 text-green-500 border-gray-300 rounded" <%= todo.completed ? "checked" : "" %> >
               </td>
             </tr>
             <% }) %>
@@ -75,24 +71,20 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <% dueToday.forEach(todo => { %>
             <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= todo.id %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.title %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.dueDate %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <input 
-                  type="checkbox" 
-                  class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300 rounded"
-                  <%= todo.completed ? "checked" : "" %>
-                >
+              <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= todo.id %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.title %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.dueDate %></td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <input type="checkbox" class="h-4 w-4 text-green-500 border-gray-300 rounded" <%= todo.completed ? "checked" : "" %> >
               </td>
             </tr>
             <% }) %>
@@ -108,24 +100,20 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <% dueLater.forEach(todo => { %>
             <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= todo.id %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.title %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.dueDate %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <input 
-                  type="checkbox" 
-                  class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300 rounded"
-                  <%= todo.completed ? "checked" : "" %>
-                >
+              <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= todo.id %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.title %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.dueDate %></td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <input type="checkbox" class="h-4 w-4 text-green-500 border-gray-300 rounded" <%= todo.completed ? "checked" : "" %> >
               </td>
             </tr>
             <% }) %>
@@ -141,24 +129,20 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <% completed.forEach(todo => { %>
             <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= todo.id %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.title %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= todo.dueDate %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                <input 
-                  type="checkbox" 
-                  class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300 rounded"
-                  checked
-                >
+              <td class="px-6 py-4 text-sm font-medium text-gray-900"><%= todo.id %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.title %></td>
+              <td class="px-6 py-4 text-sm text-gray-900"><%= todo.dueDate %></td>
+              <td class="px-6 py-4 text-sm text-gray-900">
+                <input type="checkbox" class="h-4 w-4 text-green-500 border-gray-300 rounded" checked>
               </td>
             </tr>
             <% }) %>
