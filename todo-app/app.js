@@ -29,7 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// GET / - Render all todos with sections
 app.get("/", async (req, res) => {
   try {
     const todos = await Todo.findAll({ 
@@ -39,14 +39,15 @@ app.get("/", async (req, res) => {
         ["createdAt", "ASC"]
       ]
     });
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     res.render("index", {
       allTodos: todos,
       today: today.toISOString().slice(0, 10),
-      csrfToken: req.csrfToken()
+      csrfToken: req.csrfToken(),
+      errorMessage: null
     });
   } catch (error) {
     console.error("Error loading todos:", error);
@@ -54,18 +55,30 @@ app.get("/", async (req, res) => {
   }
 });
 
-// Create new todo
+// POST /todos - Create new todo with validation
 app.post("/todos", async (req, res) => {
   try {
     const { title, dueDate } = req.body;
-    
+
     // Server-side validation
     if (!title || !title.trim()) {
-      return res.status(400).json({ error: "Title cannot be empty" });
+      const todos = await Todo.findAll({ order: [["completed", "ASC"], ["dueDate", "ASC"], ["createdAt", "ASC"]] });
+      return res.status(400).render("index", {
+        allTodos: todos,
+        today: new Date().toISOString().slice(0, 10),
+        csrfToken: req.csrfToken(),
+        errorMessage: "Title cannot be empty",
+      });
     }
     
     if (!dueDate) {
-      return res.status(400).json({ error: "Due date cannot be empty" });
+      const todos = await Todo.findAll({ order: [["completed", "ASC"], ["dueDate", "ASC"], ["createdAt", "ASC"]] });
+      return res.status(400).render("index", {
+        allTodos: todos,
+        today: new Date().toISOString().slice(0, 10),
+        csrfToken: req.csrfToken(),
+        errorMessage: "Due date cannot be empty",
+      });
     }
 
     await Todo.create({
@@ -77,11 +90,11 @@ app.post("/todos", async (req, res) => {
     res.redirect("/");
   } catch (error) {
     console.error("Error creating todo:", error);
-    res.status(500).json({ error: "Failed to create todo" });
+    res.status(500).render("error", { message: "Failed to create todo" });
   }
 });
 
-// Update todo (completion status)
+// PUT /todos/:id - Update todo completion status
 app.put("/todos/:id", async (req, res) => {
   try {
     const todo = await Todo.findByPk(req.params.id);
@@ -89,7 +102,7 @@ app.put("/todos/:id", async (req, res) => {
       return res.status(404).json({ error: "Todo not found" });
     }
 
-    // Validate the completed status
+    // Validate completed field is boolean
     if (typeof req.body.completed !== "boolean") {
       return res.status(400).json({ error: "Invalid completion status" });
     }
@@ -104,7 +117,7 @@ app.put("/todos/:id", async (req, res) => {
   }
 });
 
-// Delete todo
+// DELETE /todos/:id - Delete a todo
 app.delete("/todos/:id", async (req, res) => {
   try {
     const todo = await Todo.findByPk(req.params.id);
