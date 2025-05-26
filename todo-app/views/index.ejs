@@ -1,44 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./css/styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Document</title>
-  </head>
-  <body>
-    <div class="grid grid-cols-6">
-      <div class="col-start-3 col-span-2">
-        <%- include('header.ejs') %>
-        <form action="">
-          <div class="flex gap-2 py-4">
-            <div class="flex-auto">
-              <input
-                type="text"
-                placeholder="What's next?"
-                required
-                class="border border-gray-300 rounded text-gray-900 w-full p-2 text-sm"
-              />
-            </div>
-            <div class="flex-auto">
-              <input
-                type="date"
-                class="border border-gray-300 rounded text-gray-900 w-full p-2 text-sm leading-4"
-              />
-            </div>
-            <div class="flex-none">
-              <button
-                type="submit"
-                class="bg-green-600 text-white px-5 py-1.5 rounded font-medium mr-2 mb-2"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </form>
-        <%- include('todos.ejs')%> <%-include('footer.ejs') %>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <%- include("header") %>
+
+    <form action="/todos" method="POST" id="todo-form" class="todo-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      
+      <div class="form-group">
+        <label for="title">Title:</label>
+        <input 
+          type="text" 
+          name="title" 
+          id="title" 
+          placeholder="Enter todo title" 
+          required
+        >
       </div>
-    </div>
-  </body>
+      
+      <div class="form-group">
+        <label for="dueDate">Due Date:</label>
+        <input 
+          type="date" 
+          name="dueDate" 
+          id="dueDate" 
+          value="<%= today %>" 
+          required
+        >
+      </div>
+      
+      <button type="submit" class="submit-btn">Add Todo</button>
+    </form>
+
+    <%- include("todos", { allTodos, today, csrfToken }) %>
+
+    <%- include("footer") %>
+  </div>
+
+  <script>
+    document.getElementById('todo-form').addEventListener('submit', (e) => {
+      const title = document.getElementById('title').value.trim();
+      const dueDate = document.getElementById('dueDate').value;
+      
+      if (!title) {
+        e.preventDefault();
+        alert('Todo title cannot be empty');
+        return false;
+      }
+      
+      if (!dueDate) {
+        e.preventDefault();
+        alert('Due date cannot be empty');
+        return false;
+      }
+      
+      return true;
+    });
+  </script>
+</body>
 </html>
