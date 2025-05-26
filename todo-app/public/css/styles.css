@@ -1,42 +1,8 @@
-/* Container centers everything */
-.container {
-  max-width: 800px; /* or whatever width you prefer */
-  margin: 0 auto;    /* centers container horizontally */
-  padding: 20px;
-  text-align: center; /* centers inline content like headers */
+body {
+  background-color: aliceblue;
+  font-family: sans-serif;
 }
 
-/* Tables: no margins, center aligned */
-.todo-table {
-  width: 100%;          /* take full width inside container */
-  border-collapse: collapse;
-  margin: 0 auto;       /* center table horizontally */
-  text-align: left;     /* align text left inside table cells */
-}
-
-/* Table headers centered text */
-.todo-table thead th {
-  text-align: center;
-  padding: 8px;
-  border-bottom: 2px solid #ccc;
-}
-
-/* Table body cells padding */
-.todo-table tbody td {
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-/* Header and footer text */
-h1, h5 {
-  margin: 0 0 15px 0;
-  text-align: center;
-}
-
-/* Footer styling example */
-footer {
-  text-align: center;
-  padding: 15px 0;
-  font-size: 0.9rem;
-  color: #666;
+.Todo-Item:hover .trash-icon {
+  display: block;
 }
