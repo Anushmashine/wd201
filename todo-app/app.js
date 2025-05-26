@@ -1,93 +1,129 @@
 const express = require("express");
-const app = express();
-const { Todo } = require("./models");
-const bodyParser = require("body-parser");
-app.use(bodyParser.json());
+const csrf = require("csurf");
+const cookieParser = require("cookie-parser");
 const path = require("path");
+const bodyParser = require("body-parser");
+const methodOverride = require("method-override");
+const { Todo } = require("./models");
 
+const app = express();
+
+// View engine setup
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
-app.get("/", async (request, response) => {
-  const allTodos = await Todo.getTodos();
-  if (request.accepts("html")) {
-    response.render("index", {
-      allTodos,
-    });
-  } else {
-    response.json("index", {
-      allTodos,
-    });
-  }
-});
-
-// eslint-disable-next-line no-undef
+// Middleware setup
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/todos", async (request, response) => {
-  console.log("Processing list of all Todos ...");
-  // FILL IN YOUR CODE HERE
+// CSRF Protection
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
 
-  // First, we have to query our PostgerSQL database using Sequelize to get list of all Todos.
-  // Then, we have to respond with all Todos, like:
-  // response.send(todos)
+// Make CSRF token available to all views
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+// Routes
+app.get("/", async (req, res) => {
   try {
-    const todos = await Todo.findAll();
-    return response.json(todos);
+    const todos = await Todo.findAll({ 
+      order: [
+        ["completed", "ASC"],
+        ["dueDate", "ASC"],
+        ["createdAt", "ASC"]
+      ]
+    });
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    res.render("index", {
+      allTodos: todos,
+      today: today.toISOString().slice(0, 10),
+      csrfToken: req.csrfToken()
+    });
   } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
+    console.error("Error loading todos:", error);
+    res.status(500).render("error", { message: "Failed to load todos" });
   }
 });
 
-app.get("/todos/:id", async function (request, response) {
+// Create new todo
+app.post("/todos", async (req, res) => {
   try {
-    const todo = await Todo.findByPk(request.params.id);
-    return response.json(todo);
-  } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
-  }
-});
-
-app.post("/todos", async function (request, response) {
-  try {
-    const todo = await Todo.addTodo(request.body.title, request.body.dueDate);
-    return response.json(todo);
-  } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
-  }
-});
-
-app.put("/todos/:id/markAsCompleted", async function (request, response) {
-  const todo = await Todo.findByPk(request.params.id);
-  try {
-    const updatedTodo = await todo.markAsCompleted();
-    return response.json(updatedTodo);
-  } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
-  }
-});
-
-app.delete("/todos/:id", async function (request, response) {
-  console.log("We have to delete a Todo with ID: ", request.params.id);
-  // FILL IN YOUR CODE HERE
-
-  // First, we have to query our database to delete a Todo by ID.
-  // Then, we have to respond back with true/false based on whether the Todo was deleted or not.
-  // response.send(true)
-  try {
-    const todo = await Todo.findByPk(request.params.id);
-    if (!todo) {
-      return response.send(false);
+    const { title, dueDate } = req.body;
+    
+    // Server-side validation
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: "Title cannot be empty" });
     }
-    await todo.destroy();
-    return response.send(true);
+    
+    if (!dueDate) {
+      return res.status(400).json({ error: "Due date cannot be empty" });
+    }
+
+    await Todo.create({
+      title: title.trim(),
+      dueDate,
+      completed: false
+    });
+    
+    res.redirect("/");
   } catch (error) {
-    console.log(error);
-    return response.status(422).json(error);
+    console.error("Error creating todo:", error);
+    res.status(500).json({ error: "Failed to create todo" });
   }
+});
+
+// Update todo (completion status)
+app.put("/todos/:id", async (req, res) => {
+  try {
+    const todo = await Todo.findByPk(req.params.id);
+    if (!todo) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    // Validate the completed status
+    if (typeof req.body.completed !== "boolean") {
+      return res.status(400).json({ error: "Invalid completion status" });
+    }
+
+    todo.completed = req.body.completed;
+    await todo.save();
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error updating todo:", error);
+    res.status(500).json({ error: "Failed to update todo" });
+  }
+});
+
+// Delete todo
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    const todo = await Todo.findByPk(req.params.id);
+    if (!todo) {
+      return res.status(404).json({ error: "Todo not found" });
+    }
+
+    await todo.destroy();
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting todo:", error);
+    res.status(500).json({ error: "Failed to delete todo" });
+  }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).render("error", { message: "Something went wrong!" });
 });
 
 module.exports = app;
