@@ -15,6 +15,7 @@
     "csurf": "^1.11.0",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
+    "method-override": "^3.0.0",
     "pg": "^8.15.6",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.2"
@@ -23,3 +24,4 @@
     "nodemon": "^3.1.10"
   }
 }
+
