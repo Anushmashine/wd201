@@ -29,25 +29,45 @@ app.use((req, res, next) => {
   next();
 });
 
-// GET / - Render all todos with sections
+// Helper function to categorize todos
+function categorizeTodos(todos) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const overdue = [];
+  const dueToday = [];
+  const dueLater = [];
+
+  todos.forEach(todo => {
+    const dueDate = new Date(todo.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
+    if (dueDate < today) overdue.push(todo);
+    else if (dueDate.getTime() === today.getTime()) dueToday.push(todo);
+    else dueLater.push(todo);
+  });
+
+  return { overdue, dueToday, dueLater };
+}
+
+// GET / - Render all todos categorized
 app.get("/", async (req, res) => {
   try {
-    const todos = await Todo.findAll({ 
+    const todos = await Todo.findAll({
       order: [
         ["completed", "ASC"],
         ["dueDate", "ASC"],
-        ["createdAt", "ASC"]
-      ]
+        ["createdAt", "ASC"],
+      ],
     });
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const allTodos = categorizeTodos(todos);
 
     res.render("index", {
-      allTodos: todos,
-      today: today.toISOString().slice(0, 10),
+      allTodos,
+      today: new Date().toISOString().slice(0, 10),
       csrfToken: req.csrfToken(),
-      errorMessage: null
+      errorMessage: null,
     });
   } catch (error) {
     console.error("Error loading todos:", error);
@@ -60,21 +80,22 @@ app.post("/todos", async (req, res) => {
   try {
     const { title, dueDate } = req.body;
 
-    // Server-side validation
     if (!title || !title.trim()) {
       const todos = await Todo.findAll({ order: [["completed", "ASC"], ["dueDate", "ASC"], ["createdAt", "ASC"]] });
+      const allTodos = categorizeTodos(todos);
       return res.status(400).render("index", {
-        allTodos: todos,
+        allTodos,
         today: new Date().toISOString().slice(0, 10),
         csrfToken: req.csrfToken(),
         errorMessage: "Title cannot be empty",
       });
     }
-    
+
     if (!dueDate) {
       const todos = await Todo.findAll({ order: [["completed", "ASC"], ["dueDate", "ASC"], ["createdAt", "ASC"]] });
+      const allTodos = categorizeTodos(todos);
       return res.status(400).render("index", {
-        allTodos: todos,
+        allTodos,
         today: new Date().toISOString().slice(0, 10),
         csrfToken: req.csrfToken(),
         errorMessage: "Due date cannot be empty",
@@ -84,9 +105,9 @@ app.post("/todos", async (req, res) => {
     await Todo.create({
       title: title.trim(),
       dueDate,
-      completed: false
+      completed: false,
     });
-    
+
     res.redirect("/");
   } catch (error) {
     console.error("Error creating todo:", error);
@@ -102,14 +123,13 @@ app.put("/todos/:id", async (req, res) => {
       return res.status(404).json({ error: "Todo not found" });
     }
 
-    // Validate completed field is boolean
     if (typeof req.body.completed !== "boolean") {
       return res.status(400).json({ error: "Invalid completion status" });
     }
 
     todo.completed = req.body.completed;
     await todo.save();
-    
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error updating todo:", error);
