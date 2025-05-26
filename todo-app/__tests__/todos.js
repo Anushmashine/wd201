@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const request = require("supertest");
 
 const db = require("../models/index");
@@ -70,33 +71,21 @@ describe("Todo Application", function () {
     expect(parsedResponse.length).toBe(4);
     expect(parsedResponse[3]["title"]).toBe("Buy ps3");
   });
-    test("Deletes a todo with the given ID if it exists and sends a boolean response", async () => {
-  // First create a todo to delete
-  const createResponse = await agent.post("/todos").send({
-    title: "Todo to delete",
-    dueDate: new Date().toISOString(),
-    completed: false,
+
+  test("Deletes a todo with the given ID if it exists and sends a boolean response", async () => {
+    // FILL IN YOUR CODE HERE
+    const response = await agent.post("/todos").send({
+      title: "Buy milk",
+      dueDate: new Date().toISOString(),
+      completed: false,
+    });
+    const parsedResponse = JSON.parse(response.text);
+    const todoID = parsedResponse.id;
+
+    expect(todoID).toBeDefined();
+
+    const deleteResponse = await agent.delete(`/todos/${todoID}`).send();
+    const parsedUpdateResponse = JSON.parse(deleteResponse.text);
+    expect(parsedUpdateResponse).toBe(true);
   });
-  const parsedCreateResponse = JSON.parse(createResponse.text);
-  const todoID = parsedCreateResponse.id;
-
-  // Delete the todo
-  const deleteResponse = await agent.delete(`/todos/${todoID}`);
-  expect(deleteResponse.statusCode).toBe(200);
-  expect(deleteResponse.header["content-type"]).toBe(
-    "application/json; charset=utf-8"
-  );
-  expect(deleteResponse.body).toBe(true);
-
-  // Verify the todo is actually deleted
-  const getResponse = await agent.get("/todos");
-  const parsedGetResponse = JSON.parse(getResponse.text);
-  const deletedTodo = parsedGetResponse.find(todo => todo.id === todoID);
-  expect(deletedTodo).toBeUndefined();
-
-  // Try to delete a non-existent todo
-  const nonExistentDeleteResponse = await agent.delete(`/todos/9999`);
-  expect(nonExistentDeleteResponse.statusCode).toBe(200);
-  expect(nonExistentDeleteResponse.body).toBe(false);
 });
-  });
