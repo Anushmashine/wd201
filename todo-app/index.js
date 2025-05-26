@@ -1,23 +1,34 @@
-const app = require("./app");
-const { sequelize } = require("./models");
+const express = require("express");
+const app = express();
+const csrf = require("csurf");
+const methodOverride = require("method-override");
+const bodyParser = require("body-parser");
+const { Todo } = require("./models");
 
-const PORT = process.env.PORT || 3000;
+const csrfProtection = csrf({ cookie: false });
 
-async function startServer() {
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride("_method"));
+app.use(csrfProtection);
+
+app.get("/", async (req, res) => {
   try {
-    await sequelize.authenticate();
-    console.log("Database connected successfully.");
-    
-    // Sync models with database
-    await sequelize.sync({ alter: true }); // Use { force: true } only for development!
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
-}
+    const allTodos = {
+      overdue: await Todo.overdue(),
+      dueToday: await Todo.dueToday(),
+      dueLater: await Todo.dueLater(),
+      completed: await Todo.completed(),
+    };
 
-startServer();
+    res.render("index", {
+      allTodos,
+      csrfToken: req.csrfToken(),
+      today: new Date().toISOString().split("T")[0],
+    });
+  } catch (err) {
+    console.error("Error rendering index:", err);
+    res.status(500).send("Something went wrong.");
+  }
+});
