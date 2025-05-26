@@ -1,17 +1,26 @@
+// app.js
 const express = require("express");
+const csrf = require("csurf");
+const cookieParser = require("cookie-parser");
 const app = express();
 const { Todo } = require("./models");
 const path = require("path");
 const bodyParser = require("body-parser");
 
 // Middleware setup
+app.use(cookieParser());
+const csrfProtection = csrf({ cookie: true });
+
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use(csrfProtection);
 
-// View engine setup
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+// Pass CSRF token to all views
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Root route - renders the todo list
 app.get("/", async (req, res) => {
@@ -38,11 +47,14 @@ app.get("/", async (req, res) => {
       return !todo.completed && dueDate > today;
     });
 
-    res.render("index", { 
+    const completed = todos.filter(todo => todo.completed);
+
+    res.render("index", {
       overdue,
       dueToday,
       dueLater,
-      today: today.toISOString().slice(0, 10)
+      completed,
+      today: today.toISOString().slice(0, 10),
     });
   } catch (error) {
     console.error("Error loading todos:", error);
@@ -57,10 +69,10 @@ app.post("/todos", async (req, res) => {
     if (!title || !dueDate) {
       return res.status(400).redirect("/");
     }
-    await Todo.create({ 
-      title: title.trim(), 
-      dueDate, 
-      completed: false 
+    await Todo.create({
+      title: title.trim(),
+      dueDate,
+      completed: false,
     });
     res.redirect("/");
   } catch (error) {
@@ -69,15 +81,17 @@ app.post("/todos", async (req, res) => {
   }
 });
 
-// Mark todo as completed
-app.put("/todos/:id/markAsCompleted", async (req, res) => {
+// Update todo completion status
+app.put("/todos/:id", async (req, res) => {
   try {
     const todo = await Todo.findByPk(req.params.id);
     if (!todo) {
       return res.status(404).json({ error: "Todo not found" });
     }
-    const updatedTodo = await todo.update({ completed: true });
-    res.json(updatedTodo);
+    const completed =
+      req.body.completed === "true" || req.body.completed === true;
+    await todo.setCompletionStatus(completed);
+    res.json(todo);
   } catch (error) {
     console.error("Error updating todo:", error);
     res.status(422).json(error);
