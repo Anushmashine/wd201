@@ -1,162 +1,22 @@
 const express = require("express");
-const csrf = require("csurf");
-const cookieParser = require("cookie-parser");
 const path = require("path");
-const bodyParser = require("body-parser");
-const methodOverride = require("method-override");
 const { Todo } = require("./models");
 
 const app = express();
 
-// View engine setup
+// Middleware
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+// Set EJS as view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Middleware setup
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.use(express.static(path.join(__dirname, "public")));
-
-// CSRF Protection
-const csrfProtection = csrf({ cookie: true });
-app.use(csrfProtection);
-
-// Make CSRF token available to all views
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
-
-// Helper function to categorize todos
-function categorizeTodos(todos) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const overdue = [];
-  const dueToday = [];
-  const dueLater = [];
-
-  todos.forEach(todo => {
-    const dueDate = new Date(todo.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-
-    if (dueDate < today) overdue.push(todo);
-    else if (dueDate.getTime() === today.getTime()) dueToday.push(todo);
-    else dueLater.push(todo);
-  });
-
-  return { overdue, dueToday, dueLater };
-}
-
-// GET / - Render all todos categorized
+// Routes
 app.get("/", async (req, res) => {
-  try {
-    const todos = await Todo.findAll({
-      order: [
-        ["completed", "ASC"],
-        ["dueDate", "ASC"],
-        ["createdAt", "ASC"],
-      ],
-    });
-
-    const allTodos = categorizeTodos(todos);
-
-    res.render("index", {
-      allTodos,
-      today: new Date().toISOString().slice(0, 10),
-      csrfToken: req.csrfToken(),
-      errorMessage: null,
-    });
-  } catch (error) {
-    console.error("Error loading todos:", error);
-    res.status(500).render("error", { message: "Failed to load todos" });
-  }
-});
-
-// POST /todos - Create new todo with validation
-app.post("/todos", async (req, res) => {
-  try {
-    const { title, dueDate } = req.body;
-
-    if (!title || !title.trim()) {
-      const todos = await Todo.findAll({ order: [["completed", "ASC"], ["dueDate", "ASC"], ["createdAt", "ASC"]] });
-      const allTodos = categorizeTodos(todos);
-      return res.status(400).render("index", {
-        allTodos,
-        today: new Date().toISOString().slice(0, 10),
-        csrfToken: req.csrfToken(),
-        errorMessage: "Title cannot be empty",
-      });
-    }
-
-    if (!dueDate) {
-      const todos = await Todo.findAll({ order: [["completed", "ASC"], ["dueDate", "ASC"], ["createdAt", "ASC"]] });
-      const allTodos = categorizeTodos(todos);
-      return res.status(400).render("index", {
-        allTodos,
-        today: new Date().toISOString().slice(0, 10),
-        csrfToken: req.csrfToken(),
-        errorMessage: "Due date cannot be empty",
-      });
-    }
-
-    await Todo.create({
-      title: title.trim(),
-      dueDate,
-      completed: false,
-    });
-
-    res.redirect("/");
-  } catch (error) {
-    console.error("Error creating todo:", error);
-    res.status(500).render("error", { message: "Failed to create todo" });
-  }
-});
-
-// PUT /todos/:id - Update todo completion status
-app.put("/todos/:id", async (req, res) => {
-  try {
-    const todo = await Todo.findByPk(req.params.id);
-    if (!todo) {
-      return res.status(404).json({ error: "Todo not found" });
-    }
-
-    if (typeof req.body.completed !== "boolean") {
-      return res.status(400).json({ error: "Invalid completion status" });
-    }
-
-    todo.completed = req.body.completed;
-    await todo.save();
-
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Error updating todo:", error);
-    res.status(500).json({ error: "Failed to update todo" });
-  }
-});
-
-// DELETE /todos/:id - Delete a todo
-app.delete("/todos/:id", async (req, res) => {
-  try {
-    const todo = await Todo.findByPk(req.params.id);
-    if (!todo) {
-      return res.status(404).json({ error: "Todo not found" });
-    }
-
-    await todo.destroy();
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting todo:", error);
-    res.status(500).json({ error: "Failed to delete todo" });
-  }
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).render("error", { message: "Something went wrong!" });
+  const todos = await Todo.findAll();
+  res.render("index", { todos });
 });
 
 module.exports = app;
