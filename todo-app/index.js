@@ -3,21 +3,17 @@ const { sequelize } = require("./models");
 
 const PORT = process.env.PORT || 3000;
 
-
 async function startServer() {
   try {
-    // Test the database connection
     await sequelize.authenticate();
-    console.log("Database connection has been established successfully.");
-
-    await sequelize.sync(); // Remove { force: true } in production!
-
+    console.log("Database connected successfully.");
+    await sequelize.sync();
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      console.log(`Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Unable to start the server:", error);
-    process.exit(1); // Exit with failure
+    console.error("Failed to start the server:", error);
+    process.exit(1);
   }
 }
 
