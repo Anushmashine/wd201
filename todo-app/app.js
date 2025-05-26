@@ -90,7 +90,9 @@ app.put("/todos/:id", async (req, res) => {
     }
     const completed =
       req.body.completed === "true" || req.body.completed === true;
-    await todo.setCompletionStatus(completed);
+    // Updated this to directly set and save the completed status
+    todo.completed = completed;
+    await todo.save();
     res.json(todo);
   } catch (error) {
     console.error("Error updating todo:", error);
