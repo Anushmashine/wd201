@@ -1,5 +1,4 @@
 <%
-  const now = new Date();
   const today = new Date().toISOString().slice(0, 10);
   const overdue = [], dueToday = [], dueLater = [], completed = [];
 
@@ -20,7 +19,7 @@
 <div class="todo-sections">
   <!-- Overdue Section -->
   <div class="section">
-    <h2>Overdue <span id="count-overdue"><%= overdue.length %></span></h2>
+    <h5>Overdue <span id="count-overdue"><%= overdue.length %></span></h5>
     <table class="todo-table">
       <thead>
         <tr>
@@ -38,6 +37,8 @@
                 <input
                   type="checkbox"
                   id="todo-<%= todo.id %>"
+                  name="completed"
+                  value="true"
                   onchange="toggleTodo(<%= todo.id %>, this.checked)"
                 >
               </label>
@@ -55,7 +56,7 @@
 
   <!-- Due Today Section -->
   <div class="section">
-    <h2>Due Today <span id="count-due-today"><%= dueToday.length %></span></h2>
+    <h5>Due Today <span id="count-due-today"><%= dueToday.length %></span></h5>
     <table class="todo-table">
       <thead>
         <tr>
@@ -73,6 +74,8 @@
                 <input
                   type="checkbox"
                   id="todo-<%= todo.id %>"
+                  name="completed"
+                  value="true"
                   onchange="toggleTodo(<%= todo.id %>, this.checked)"
                 >
               </label>
@@ -90,7 +93,7 @@
 
   <!-- Due Later Section -->
   <div class="section">
-    <h2>Due Later <span id="count-due-later"><%= dueLater.length %></span></h2>
+    <h5>Due Later <span id="count-due-later"><%= dueLater.length %></span></h5>
     <table class="todo-table">
       <thead>
         <tr>
@@ -108,6 +111,8 @@
                 <input
                   type="checkbox"
                   id="todo-<%= todo.id %>"
+                  name="completed"
+                  value="true"
                   onchange="toggleTodo(<%= todo.id %>, this.checked)"
                 >
               </label>
@@ -125,7 +130,7 @@
 
   <!-- Completed Section -->
   <div class="section">
-    <h2>Completed <span id="count-completed"><%= completed.length %></span></h2>
+    <h5>Completed <span id="count-completed"><%= completed.length %></span></h5>
     <table class="todo-table">
       <thead>
         <tr>
@@ -143,6 +148,8 @@
                 <input
                   type="checkbox"
                   id="todo-<%= todo.id %>"
+                  name="completed"
+                  value="true"
                   checked
                   onchange="toggleTodo(<%= todo.id %>, this.checked)"
                 >
@@ -181,7 +188,7 @@
 
   async function deleteTodo(id) {
     if (!confirm('Are you sure you want to delete this todo?')) return;
-    
+
     try {
       const response = await fetch(`/todos/${id}`, {
         method: 'DELETE',
