@@ -7,7 +7,7 @@
 </head>
 <body>
   <header>
-    <h1>Todo Manager</h1>
+    <%- include("header") %>
   </header>
 
   <!-- Form to create a new todo -->
@@ -31,7 +31,7 @@
               <input type="checkbox" data-id="<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
             </td>
             <td><%= todo.title %></td>
-            <td><%= todo.dueDate %></td>
+            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
             <td>
               <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -55,7 +55,7 @@
               <input type="checkbox" data-id="<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
             </td>
             <td><%= todo.title %></td>
-            <td><%= todo.dueDate %></td>
+            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
             <td>
               <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -79,7 +79,7 @@
               <input type="checkbox" data-id="<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
             </td>
             <td><%= todo.title %></td>
-            <td><%= todo.dueDate %></td>
+            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
             <td>
               <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -103,7 +103,7 @@
               <input type="checkbox" data-id="<%= todo.id %>" checked />
             </td>
             <td><%= todo.title %></td>
-            <td><%= todo.dueDate %></td>
+            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
             <td>
               <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
