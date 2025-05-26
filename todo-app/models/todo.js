@@ -1,5 +1,5 @@
 "use strict";
-const { Model, Op } = require("sequelize");
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Todo extends Model {
     /**
@@ -11,61 +11,20 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
-
-    static addTodo({ title, dueDate }) {
-      return this.create({ title: title, dueDate: dueDate, completed: false });
-    }
-
-    static async overdue() {
-      return this.findAll({
-        where: {
-          dueDate: {
-            [Op.lt]: new Date(),
-          },
-          completed: false,
-        },
+    static addTodo(title, dueDate) {
+      return this.create({
+        title: title,
+        dueDate: dueDate,
+        completed: false,
       });
     }
 
-    static async dueLater() {
-      return this.findAll({
-        where: {
-          dueDate: {
-            [Op.gt]: new Date(),
-          },
-          completed: false,
-        },
-      });
+    static getTodos() {
+      return this.findAll();
     }
 
-    static async dueToday() {
-      return this.findAll({
-        where: {
-          dueDate: {
-            [Op.eq]: new Date(),
-          },
-          completed: false,
-        },
-      });
-    }
-
-    static async completed() {
-      return this.findAll({
-        where: {
-          completed: true,
-        },
-      });
-    }
-    static async remove(id) {
-      return this.destroy({
-        where: {
-          id,
-        },
-      });
-    }
-
-    setCompletionStatus(completed) {
-      return this.update({ completed });
+    markAsCompleted() {
+      return this.update({ completed: true });
     }
   }
   Todo.init(
