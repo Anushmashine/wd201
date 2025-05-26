@@ -2,10 +2,15 @@
 const express = require("express");
 const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
-const app = express();
-const { Todo } = require("./models");
 const path = require("path");
 const bodyParser = require("body-parser");
+const { Todo } = require("./models");
+
+const app = express();
+
+// Set up EJS as the view engine and specify views folder
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // Middleware setup
 app.use(cookieParser());
@@ -90,7 +95,6 @@ app.put("/todos/:id", async (req, res) => {
     }
     const completed =
       req.body.completed === "true" || req.body.completed === true;
-    // Updated this to directly set and save the completed status
     todo.completed = completed;
     await todo.save();
     res.json(todo);
