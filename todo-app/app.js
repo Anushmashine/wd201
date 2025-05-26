@@ -1,27 +1,28 @@
-// app.js
 const express = require("express");
 const csrf = require("csurf");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const bodyParser = require("body-parser");
+const methodOverride = require("method-override"); // ✅ For PUT & DELETE
 const { Todo } = require("./models");
 
 const app = express();
 
-// Set up EJS as the view engine and specify views folder
+// View engine setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
 // Middleware setup
 app.use(cookieParser());
-const csrfProtection = csrf({ cookie: true });
-
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method")); // ✅ Enables PUT/DELETE via forms
 app.use(express.static(path.join(__dirname, "public")));
+
+const csrfProtection = csrf({ cookie: true });
 app.use(csrfProtection);
 
-// Pass CSRF token to all views
+// Make CSRF token available to all views
 app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   next();
@@ -62,7 +63,7 @@ app.get("/", async (req, res) => {
       today: today.toISOString().slice(0, 10),
     });
   } catch (error) {
-    console.error("Error loading todos:", error);
+    console.error("Error loading todos:", error.message, error.stack);
     res.status(500).send("Internal Server Error");
   }
 });
@@ -81,7 +82,7 @@ app.post("/todos", async (req, res) => {
     });
     res.redirect("/");
   } catch (error) {
-    console.error("Error creating todo:", error);
+    console.error("Error creating todo:", error.message, error.stack);
     res.status(422).redirect("/");
   }
 });
@@ -99,7 +100,7 @@ app.put("/todos/:id", async (req, res) => {
     await todo.save();
     res.json(todo);
   } catch (error) {
-    console.error("Error updating todo:", error);
+    console.error("Error updating todo:", error.message, error.stack);
     res.status(422).json(error);
   }
 });
@@ -114,7 +115,7 @@ app.delete("/todos/:id", async (req, res) => {
     await todo.destroy();
     res.json(true);
   } catch (error) {
-    console.error("Error deleting todo:", error);
+    console.error("Error deleting todo:", error.message, error.stack);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -125,7 +126,7 @@ app.get("/todos", async (req, res) => {
     const todos = await Todo.findAll({ order: [["id", "ASC"]] });
     res.json(todos);
   } catch (error) {
-    console.error("Error fetching todos:", error);
+    console.error("Error fetching todos:", error.message, error.stack);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -139,7 +140,7 @@ app.get("/todos/:id", async (req, res) => {
     }
     res.json(todo);
   } catch (error) {
-    console.error("Error fetching todo:", error);
+    console.error("Error fetching todo:", error.message, error.stack);
     res.status(422).json(error);
   }
 });
