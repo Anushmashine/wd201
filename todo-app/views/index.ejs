@@ -1,77 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Todo App</title>
-  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <div class="container">
-    <%- include("header") %>
-
-    <!-- Form to add new todo -->
-    <form action="/todos" method="POST" id="todo-form" class="todo-form">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>"/>
-
-      <div class="form-group">
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" placeholder="Enter todo title" required />
-      </div>
-
-      <div class="form-group">
-        <label for="dueDate">Due Date:</label>
-        <input type="date" id="dueDate" name="dueDate" value="<%= today %>" required />
-      </div>
-
-      <button type="submit" class="submit-btn">Add Todo</button>
-    </form>
-
-    <!-- Todo lists -->
-    <h2>Overdue</h2>
-    <div><%= allTodos.overdue.length %> items</div>
-    <ul>
-      <% allTodos.overdue.forEach(todo => { %>
-        <%- include("todoItem", { todo, csrfToken }) %>
-      <% }) %>
-    </ul>
-
-    <h2>Due Today</h2>
-    <div><%= allTodos.dueToday.length %> items</div>
-    <ul>
-      <% allTodos.dueToday.forEach(todo => { %>
-        <%- include("todoItem", { todo, csrfToken }) %>
-      <% }) %>
-    </ul>
-
-    <h2>Due Later</h2>
-    <div><%= allTodos.dueLater.length %> items</div>
-    <ul>
-      <% allTodos.dueLater.forEach(todo => { %>
-        <%- include("todoItem", { todo, csrfToken }) %>
-      <% }) %>
-    </ul>
-
-    <h2>Completed</h2>
-    <div><%= allTodos.completed.length %> items</div>
-    <ul>
-      <% allTodos.completed.forEach(todo => { %>
-        <%- include("todoItem", { todo, csrfToken }) %>
-      <% }) %>
-    </ul>
-
-    <%- include("footer") %>
-  </div>
-
-  <script>
-    document.getElementById("todo-form").addEventListener("submit", (e) => {
-      const title = document.getElementById("title").value.trim();
-      const dueDate = document.getElementById("dueDate").value;
-      if (!title || !dueDate) {
-        e.preventDefault();
-        alert("Please fill out all fields");
-      }
-    });
-  </script>
+  <%- include("header") %>
+  <%- include("todos", { todos: todos }) %>
+  <%- include("footer") %>
 </body>
 </html>
+
