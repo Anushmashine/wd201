@@ -29,20 +29,20 @@ app.get("/", async (req, res) => {
     const dueToday = todos.filter(todo => {
       const dueDate = new Date(todo.dueDate);
       dueDate.setHours(0, 0, 0, 0);
-      return dueDate.getTime() === today.getTime();
+      return !todo.completed && dueDate.getTime() === today.getTime();
     });
 
     const dueLater = todos.filter(todo => {
       const dueDate = new Date(todo.dueDate);
       dueDate.setHours(0, 0, 0, 0);
-      return dueDate > today;
+      return !todo.completed && dueDate > today;
     });
 
     res.render("index", { 
       overdue,
-      dueToday, 
+      dueToday,
       dueLater,
-      today: today.toISOString().slice(0, 10) // For form default date
+      today: today.toISOString().slice(0, 10)
     });
   } catch (error) {
     console.error("Error loading todos:", error);
@@ -58,8 +58,8 @@ app.post("/todos", async (req, res) => {
       return res.status(400).redirect("/");
     }
     await Todo.create({ 
-      title: title.trim(),
-      dueDate,
+      title: title.trim(), 
+      dueDate, 
       completed: false 
     });
     res.redirect("/");
