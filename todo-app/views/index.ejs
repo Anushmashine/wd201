@@ -16,24 +16,12 @@
 
       <div class="form-group">
         <label for="title">Title:</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          placeholder="Enter todo title"
-          required
-        />
+        <input type="text" id="title" name="title" placeholder="Enter todo title" required />
       </div>
 
       <div class="form-group">
         <label for="dueDate">Due Date:</label>
-        <input
-          type="date"
-          id="dueDate"
-          name="dueDate"
-          value="<%= today %>"
-          required
-        />
+        <input type="date" id="dueDate" name="dueDate" value="<%= today %>" required />
       </div>
 
       <button type="submit" class="submit-btn">Add Todo</button>
@@ -41,33 +29,33 @@
 
     <!-- Todo lists -->
     <h2>Overdue</h2>
-    <div id="count-overdue"><%= (allTodos.overdue || []).length %> items</div>
+    <div><%= allTodos.overdue.length %> items</div>
     <ul>
-      <% (allTodos.overdue || []).forEach(todo => { %>
+      <% allTodos.overdue.forEach(todo => { %>
         <%- include("todoItem", { todo, csrfToken }) %>
       <% }) %>
     </ul>
 
     <h2>Due Today</h2>
-    <div id="count-due-today"><%= (allTodos.dueToday || []).length %> items</div>
+    <div><%= allTodos.dueToday.length %> items</div>
     <ul>
-      <% (allTodos.dueToday || []).forEach(todo => { %>
+      <% allTodos.dueToday.forEach(todo => { %>
         <%- include("todoItem", { todo, csrfToken }) %>
       <% }) %>
     </ul>
 
     <h2>Due Later</h2>
-    <div id="count-due-later"><%= (allTodos.dueLater || []).length %> items</div>
+    <div><%= allTodos.dueLater.length %> items</div>
     <ul>
-      <% (allTodos.dueLater || []).forEach(todo => { %>
+      <% allTodos.dueLater.forEach(todo => { %>
         <%- include("todoItem", { todo, csrfToken }) %>
       <% }) %>
     </ul>
 
     <h2>Completed</h2>
-    <div id="count-completed"><%= (allTodos.completed || []).length %> items</div>
+    <div><%= allTodos.completed.length %> items</div>
     <ul>
-      <% (allTodos.completed || []).forEach(todo => { %>
+      <% allTodos.completed.forEach(todo => { %>
         <%- include("todoItem", { todo, csrfToken }) %>
       <% }) %>
     </ul>
@@ -76,18 +64,12 @@
   </div>
 
   <script>
-    // Client-side form validation
     document.getElementById("todo-form").addEventListener("submit", (e) => {
       const title = document.getElementById("title").value.trim();
       const dueDate = document.getElementById("dueDate").value;
-
-      if (!title) {
+      if (!title || !dueDate) {
         e.preventDefault();
-        alert("Todo title cannot be empty");
-      }
-      if (!dueDate) {
-        e.preventDefault();
-        alert("Due date cannot be empty");
+        alert("Please fill out all fields");
       }
     });
   </script>
