@@ -1,22 +1,68 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+/* Container and Layout */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-header, footer {
-  background-color: #f0f0f0;
-  padding: 10px;
-  text-align: center;
+/* Table Styling */
+.table-container {
+  overflow-x: auto;
+  margin: 20px 0;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin: 0 auto;
+  background: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Form Styling */
+.todo-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.todo-form input {
   padding: 10px;
-  border: 1px solid #ccc;
-  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+.todo-form button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Section Styling */
+.todo-section {
+  margin-bottom: 30px;
+}
+
+.todo-section h2 {
+  color: #333;
+  margin-bottom: 10px;
 }
