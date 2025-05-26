@@ -1,125 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Todo Manager</title>
-  <link rel="stylesheet" href="/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Todo App</title>
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <header>
+  <div class="container">
     <%- include("header") %>
-  </header>
 
-  <!-- Form to create a new todo -->
-  <form action="/todos" method="POST">
-    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <input type="text" name="title" placeholder="Enter todo title" required />
-    <input type="date" name="dueDate" value="<%= today %>" required />
-    <button type="submit">Add</button>
-  </form>
+    <form action="/todos" method="POST" id="todo-form">
+      <input 
+        type="text" 
+        name="title" 
+        placeholder="Enter todo title" 
+        required 
+      />
+      <input 
+        type="date" 
+        name="dueDate" 
+        value="<%= today %>" 
+        required 
+      />
+      <button type="submit">Add Todo</button>
+    </form>
 
-  <main>
-    <!-- Overdue Todos -->
-    <section>
-      <h2>Overdue</h2>
-      <p id="overdue"><%= overdue.length %></p>
-      <table>
-        <tr><th>Status</th><th>Title</th><th>Due Date</th><th>Actions</th></tr>
-        <% overdue.forEach(todo => { %>
-          <tr>
-            <td>
-              <input type="checkbox" data-id="<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
-            </td>
-            <td><%= todo.title %></td>
-            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
-            <td>
-              <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </table>
-    </section>
+    <%- include("todos", { overdue, dueToday, dueLater }) %>
 
-    <!-- Due Today -->
-    <section>
-      <h2>Due Today</h2>
-      <p id="due-today"><%= dueToday.length %></p>
-      <table>
-        <tr><th>Status</th><th>Title</th><th>Due Date</th><th>Actions</th></tr>
-        <% dueToday.forEach(todo => { %>
-          <tr>
-            <td>
-              <input type="checkbox" data-id="<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
-            </td>
-            <td><%= todo.title %></td>
-            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
-            <td>
-              <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </table>
-    </section>
-
-    <!-- Due Later -->
-    <section>
-      <h2>Due Later</h2>
-      <p id="due-later"><%= dueLater.length %></p>
-      <table>
-        <tr><th>Status</th><th>Title</th><th>Due Date</th><th>Actions</th></tr>
-        <% dueLater.forEach(todo => { %>
-          <tr>
-            <td>
-              <input type="checkbox" data-id="<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
-            </td>
-            <td><%= todo.title %></td>
-            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
-            <td>
-              <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </table>
-    </section>
-
-    <!-- Completed -->
-    <section>
-      <h2>Completed</h2>
-      <p id="completed"><%= completed.length %></p>
-      <table>
-        <tr><th>Status</th><th>Title</th><th>Due Date</th><th>Actions</th></tr>
-        <% completed.forEach(todo => { %>
-          <tr>
-            <td>
-              <input type="checkbox" data-id="<%= todo.id %>" checked />
-            </td>
-            <td><%= todo.title %></td>
-            <td><%= new Date(todo.dueDate).toISOString().slice(0, 10) %></td>
-            <td>
-              <form method="POST" action="/todos/<%= todo.id %>?_method=DELETE">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <button type="submit">Delete</button>
-              </form>
-            </td>
-          </tr>
-        <% }) %>
-      </table>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 Your Name - Todo Manager App</p>
-  </footer>
-
-  <script src="/script.js"></script>
+    <%- include("footer") %>
+  </div>
 </body>
 </html>
