@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "A simple todo app using Node.js, Express, EJS, and PostgreSQL",
   "main": "index.js",
- "scripts": {
-  "build": "npm install && npm run migrate",
-  "migrate": "npx sequelize-cli db:migrate",
-  "test": "jest --forceExit",
-  "start": "node index.js",
-  "dev": "nodemon -e js,ejs index.js"
+  "scripts": {
+    "build": "npm install && npm run migrate",
+    "migrate": "npx sequelize-cli db:migrate",
+    "test": "jest --forceExit",
+    "start": "node index.js",
+    "start:prod": "node index.js",
+    "dev": "nodemon -e js,ejs index.js"
   },
   "author": "anushmashine",
   "license": "ISC",
