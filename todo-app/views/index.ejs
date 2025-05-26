@@ -1,13 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
   <title>Todo App</title>
-  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <%- include("header") %>
-  <%- include("todos", { todos: todos }) %>
+
+  <form action="/todos" method="POST">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="text" name="title" required />
+    <input type="date" name="dueDate" required />
+    <button type="submit">Add Todo</button>
+  </form>
+
+  <h2>Overdue (<span id="count-overdue"><%= overdue.length %></span>)</h2>
+  <ul>
+    <% overdue.forEach(todo => { %>
+      <li class="Todo-Item">
+        <label for="todo-<%= todo.id %>">
+          <input type="checkbox" id="todo-<%= todo.id %>" <%= todo.completed ? "checked" : "" %> />
+          <%= todo.title %> - <%= todo.dueDate %>
+        </label>
+      </li>
+    <% }) %>
+  </ul>
+
+  <h2>Due Today (<span id="count-due-today"><%= dueToday.length %></span>)</h2>
+  <ul>
+    <% dueToday.forEach(todo => { %>
+      <li class="Todo-Item">
+        <label for="todo-<%= todo.id %>">
+          <input type="checkbox" id="todo-<%= todo.id %>" />
+          <%= todo.title %> - <%= todo.dueDate %>
+        </label>
+      </li>
+    <% }) %>
+  </ul>
+
+  <h2>Due Later (<span id="count-due-later"><%= dueLater.length %></span>)</h2>
+  <ul>
+    <% dueLater.forEach(todo => { %>
+      <li class="Todo-Item">
+        <label for="todo-<%= todo.id %>">
+          <input type="checkbox" id="todo-<%= todo.id %>" />
+          <%= todo.title %> - <%= todo.dueDate %>
+        </label>
+      </li>
+    <% }) %>
+  </ul>
+
+  <h2>Completed (<span id="count-completed"><%= completed.length %></span>)</h2>
+  <ul>
+    <% completed.forEach(todo => { %>
+      <li class="Todo-Item">
+        <label for="todo-<%= todo.id %>">
+          <input type="checkbox" id="todo-<%= todo.id %>" checked />
+          <%= todo.title %> - <%= todo.dueDate %>
+        </label>
+      </li>
+    <% }) %>
+  </ul>
+
   <%- include("footer") %>
 </body>
 </html>
