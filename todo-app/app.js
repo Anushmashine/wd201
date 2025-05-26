@@ -9,16 +9,17 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(csrf({ cookie: true }));
+
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 
 app.get("/", async (req, res) => {
   const todos = await Todo.findAll();
   res.render("index", {
-    overdue: todos.filter(t => t.isOverdue()),
-    dueToday: todos.filter(t => t.isDueToday()),
-    dueLater: todos.filter(t => t.isDueLater()),
-    completed: todos.filter(t => t.completed),
+    overdueTodos: todos.filter(t => t.isOverdue()),
+    dueTodayTodos: todos.filter(t => t.isDueToday()),
+    dueLaterTodos: todos.filter(t => t.isDueLater()),
+    completedTodos: todos.filter(t => t.completed),
     csrfToken: req.csrfToken(),
   });
 });
@@ -35,7 +36,9 @@ app.post("/todos", async (req, res) => {
 app.put("/todos/:id", async (req, res) => {
   const todo = await Todo.findByPk(req.params.id);
   if (todo) {
-    await todo.setCompletionStatus(req.body.completed);
+    // Convert string to boolean
+    const completed = req.body.completed === 'true' || req.body.completed === true;
+    await todo.setCompletionStatus(completed);
     res.json(todo);
   } else {
     res.status(404).send("Not found");
@@ -48,3 +51,4 @@ app.delete("/todos/:id", async (req, res) => {
 });
 
 module.exports = app;
+
