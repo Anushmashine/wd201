@@ -1,20 +1,125 @@
-<table border="1">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Title</th>
-      <th>Due Date</th>
-      <th>Completed</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% todos.forEach(todo => { %>
-      <tr>
-        <td><%= todo.id %></td>
-        <td><%= todo.title %></td>
-        <td><%= todo.dueDate %></td>
-        <td><%= todo.completed ? "Yes" : "No" %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+<div class="todo-sections">
+    <!-- Overdue Section -->
+    <section class="overdue-section" id="overdue">
+        <h5>Overdue <span id="count-overdue">
+                <%= overdue.length %>
+            </span></h5>
+        <ul>
+            <% overdue.forEach(todo=> { %>
+                <li class="Todo-Item">
+                    <input type="checkbox" id="todo-<%= todo.id %>"
+                        onchange="updateTodoStatus('<%= todo.id %>', this.checked)" <%=todo.completed ? 'checked' : ''
+                        %>>
+                    <label for="todo-<%= todo.id %>">
+                        <%= todo.title %>
+                    </label>
+                    <span class="due-date">
+                        <%= todo.dueDate %>
+                    </span>
+                    <button class="delete-btn" onclick="deleteTodo('<%= todo.id %>')">Delete</button>
+                </li>
+                <% }); %>
+        </ul>
+    </section>
+
+    <!-- Due Today Section -->
+    <section class="due-today-section" id="due-today">
+        <h5>Due Today <span id="count-due-today">
+                <%= dueToday.length %>
+            </span></h5>
+        <ul>
+            <% dueToday.forEach(todo=> { %>
+                <li class="Todo-Item">
+                    <input type="checkbox" id="todo-<%= todo.id %>"
+                        onchange="updateTodoStatus('<%= todo.id %>', this.checked)" <%=todo.completed ? 'checked' : ''
+                        %>>
+                    <label for="todo-<%= todo.id %>">
+                        <%= todo.title %>
+                    </label>
+                    <button class="delete-btn" onclick="deleteTodo('<%= todo.id %>')">Delete</button>
+                </li>
+                <% }); %>
+        </ul>
+    </section>
+
+    <!-- Due Later Section -->
+    <section class="due-later-section" id="due-later">
+        <h5>Due Later <span id="count-due-later">
+                <%= dueLater.length %>
+            </span></h5>
+        <ul>
+            <% dueLater.forEach(todo=> { %>
+                <li class="Todo-Item">
+                    <input type="checkbox" id="todo-<%= todo.id %>"
+                        onchange="updateTodoStatus('<%= todo.id %>', this.checked)" <%=todo.completed ? 'checked' : ''
+                        %>>
+                    <label for="todo-<%= todo.id %>">
+                        <%= todo.title %>
+                    </label>
+                    <span class="due-date">
+                        <%= todo.dueDate %>
+                    </span>
+                    <button class="delete-btn" onclick="deleteTodo('<%= todo.id %>')">Delete</button>
+                </li>
+                <% }); %>
+        </ul>
+    </section>
+
+    <!-- Completed Section -->
+    <section class="completed-section" id="completed">
+        <h5>Completed Items <span id="count-completed">
+                <%= completed.length %>
+            </span></h5>
+        <ul>
+            <% completed.forEach(todo=> { %>
+                <li class="Todo-Item">
+                    <input type="checkbox" id="todo-<%= todo.id %>"
+                        onchange="updateTodoStatus('<%= todo.id %>', this.checked)" checked>
+                    <label for="todo-<%= todo.id %>">
+                        <%= todo.title %>
+                    </label>
+                    <span class="due-date">
+                        <%= todo.dueDate %>
+                    </span>
+                    <button class="delete-btn" onclick="deleteTodo('<%= todo.id %>')">Delete</button>
+                </li>
+                <% }); %>
+        </ul>
+    </section>
+</div>
+
+<script>
+    function updateTodoStatus(id, completed) {
+        fetch(`/todos/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'CSRF-Token': '<%= csrfToken %>'
+            },
+            body: JSON.stringify({ completed })
+        })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function deleteTodo(id) {
+        if (confirm('Are you sure you want to delete this task?')) {
+            fetch(`/todos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'CSRF-Token': '<%= csrfToken %>'
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.reload();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
