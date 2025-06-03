@@ -1,54 +1,136 @@
-const express = require("express");
-const app = express();
-const csrf = require("csurf");
-const cookieParser = require("cookie-parser");
-const bodyParser = require("body-parser");
-const { Todo } = require("./models");
+const express = require('express');
+const router = express.Router();
+const { Todo } = require('./models');
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
 
-app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.use(csrf({ cookie: true }));
+router.get('/', async (req, res) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const todos = await Todo.findAll({ order: [['dueDate', 'ASC']] });
 
-app.set("view engine", "ejs");
-app.use(express.static("public"));
+        const overdue = todos.filter(todo =>
+            !todo.completed && todo.dueDate < today
+        );
+        const dueToday = todos.filter(todo =>
+            !todo.completed && todo.dueDate === today
+        );
+        const dueLater = todos.filter(todo =>
+            !todo.completed && todo.dueDate > today
+        );
+        const completed = todos.filter(todo => todo.completed);
 
-app.get("/", async (req, res) => {
-  const todos = await Todo.findAll();
-  res.render("index", {
-    overdueTodos: todos.filter(t => t.isOverdue()),
-    dueTodayTodos: todos.filter(t => t.isDueToday()),
-    dueLaterTodos: todos.filter(t => t.isDueLater()),
-    completedTodos: todos.filter(t => t.completed),
-    csrfToken: req.csrfToken(),
-  });
+        res.render('index', {
+            todos,
+            overdue,
+            dueToday,
+            dueLater,
+            completed,
+            today,
+            csrfToken: req.csrfToken()
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
 });
 
-app.post("/todos", async (req, res) => {
-  const { title, dueDate } = req.body;
-  if (!title || !dueDate) {
-    return res.status(400).send("Title and dueDate are required");
-  }
-  await Todo.addTask({ title, dueDate });
-  res.redirect("/");
+router.use((req, res, next) => {
+    res.locals.csrfToken = req.csrfToken(); // Make available to all views
+    next();
 });
 
-app.put("/todos/:id", async (req, res) => {
-  const todo = await Todo.findByPk(req.params.id);
-  if (todo) {
-    // Convert string to boolean
-    const completed = req.body.completed === 'true' || req.body.completed === true;
-    await todo.setCompletionStatus(completed);
-    res.json(todo);
-  } else {
-    res.status(404).send("Not found");
-  }
+// In your POST route
+router.post('/todos', csrfProtection, async (req, res) => {
+    try {
+        // Validation
+        if (!req.body.title || req.body.title.trim() === '') {
+            return res.status(400).send('Title is required');
+        }
+        if (!req.body.dueDate) {
+            return res.status(400).send('Due date is required');
+        }
+
+        // Create todo
+        await Todo.create({
+            title: req.body.title.trim(),
+            dueDate: req.body.dueDate,
+            completed: false
+        });
+
+        res.redirect('/');
+    } catch (error) {
+        res.status(500).send('Error creating todo');
+    }
 });
 
-app.delete("/todos/:id", async (req, res) => {
-  await Todo.remove(req.params.id);
-  res.status(200).send("Deleted");
+router.post('/todos/:id', csrfProtection, async (req, res) => {
+    try {
+        const todo = await Todo.findByPk(req.params.id);
+        if (!todo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+
+        await todo.update({
+            title: req.body.title,
+            dueDate: req.body.dueDate
+        });
+
+        res.redirect('/');
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
-module.exports = app;
+// Update PUT endpoint to accept completed status
+router.put('/todos/:id', csrfProtection, async (req, res) => {
+    try {
+        const todo = await Todo.findByPk(req.params.id);
+        if (!todo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
 
+        // Use the completed status from request body
+        await todo.update({
+            completed: req.body.completed
+        });
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Update error:', error);
+        res.status(500).json({ error: 'Failed to update todo' });
+    }
+});
+
+router.delete('/todos/:id', csrfProtection, async (req, res) => {
+    try {
+        const todo = await Todo.findByPk(req.params.id);
+        if (!todo) {
+            return res.status(404).json({ error: 'Todo not found' });
+        }
+
+        await Todo.destroy({ where: { id: req.params.id } });
+        res.status(204).end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+router.get('/todos/:id/edit', csrfProtection, async (req, res) => { // Add csrfProtection
+    try {
+        const todo = await Todo.findByPk(req.params.id);
+        if (!todo) return res.status(404).send('Todo not found');
+        todo.dueDate = new Date(todo.dueDate);
+        res.render('edit', {
+            todo,
+            csrfToken: req.csrfToken() // Explicitly pass
+        });
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
+
+module.exports = router;
